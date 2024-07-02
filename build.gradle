@@ -33,6 +33,7 @@ loom {
 		}
 	}
 
+	accessWidenerPath = file("src/main/resources/cui.accesswidener")
 }
 
 

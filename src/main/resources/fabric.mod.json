@@ -15,14 +15,14 @@
 	"icon": "assets/cui/icon.png",
 	"environment": "*",
 	"entrypoints": {
-		"modmenu": [
-			"com.akicater.ModMenuApiImpl"
-		],
 		"main": [
 			"com.akicater.Cui"
 		],
 		"client": [
 			"com.akicater.CuiClient"
+		],
+		"modmenu": [
+			"com.akicater.ModMenuApiImpl"
 		]
 	},
 	"mixins": [
@@ -40,5 +40,6 @@
 	},
 	"suggests": {
 		"another-mod": "*"
-	}
+	},
+	"accessWidener" : "cui.accesswidener"
 }
