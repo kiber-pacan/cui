@@ -7,7 +7,9 @@ import me.shedaniel.autoconfig.AutoConfig;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.hud.InGameHud;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.Identifier;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -30,6 +32,9 @@ public class ColorfulHudMixin {
 	float g;
 	@Unique
 	float b;
+
+	@Shadow
+	private static final Identifier ICONS = new Identifier("textures/gui/icons.png");
 
 	@Inject(at = @At(value = "HEAD"), method = "render")
 	private void color(DrawContext context, float tickDelta, CallbackInfo ci) {
@@ -59,16 +64,25 @@ public class ColorfulHudMixin {
 		context.setShaderColor(1,1,1,1);
 	}
 
-	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/random/Random;nextInt(I)I", shift = At.Shift.AFTER), method = "renderHealthBar")
-	private void color(DrawContext context, PlayerEntity player, int x, int y, int lines, int regeneratingHeartIndex, float maxHealth, int lastHealth, int health, int absorption, boolean blinking, CallbackInfo ci) {
-		InGameHud.HeartType heartType = InGameHud.HeartType.fromPlayerState(player);
-		if (heartType == InGameHud.HeartType.NORMAL) {
+	public int getU(boolean halfHeart, boolean blinking) {
+		int i;
+		int j = halfHeart ? 1 : 0;
+		int k = false && blinking ? 2 : 0;
+		i = j + k;
+
+		return 16 + (10 * 2) * 9;
+	}
+
+	@Inject(at = @At(value = "HEAD"), method = "drawHeart")
+	private void color(DrawContext context, InGameHud.HeartType type, int x, int y, int v, boolean blinking, boolean halfHeart, CallbackInfo ci) {
+		if (type == InGameHud.HeartType.NORMAL) {
 			context.setShaderColor(r,g,b,1);
 		}
 	}
 
-	@Inject(at = @At(value = "INVOKE", target = "dra", shift = At.Shift.AFTER), method = "renderHealthBar")
-	private void uncolor(DrawContext context, PlayerEntity player, int x, int y, int lines, int regeneratingHeartIndex, float maxHealth, int lastHealth, int health, int absorption, boolean blinking, CallbackInfo ci) {
+	@Inject(at = @At(value = "TAIL"), method = "drawHeart")
+	private void uncolor(DrawContext context, InGameHud.HeartType type, int x, int y, int v, boolean blinking, boolean halfHeart, CallbackInfo ci) {
 		context.setShaderColor(1,1,1,1);
+		context.drawTexture(ICONS, x, y, 16 + (10 * 2) * 9, v, 9, 9);
 	}
 }
