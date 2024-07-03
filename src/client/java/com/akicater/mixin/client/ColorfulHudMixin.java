@@ -4,6 +4,8 @@ import com.akicater.CUIConfig;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.autoconfig.AutoConfig;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.hud.InGameHud;
 import net.minecraft.entity.player.PlayerEntity;
@@ -64,15 +66,6 @@ public class ColorfulHudMixin {
 		context.setShaderColor(1,1,1,1);
 	}
 
-	public int getU(boolean halfHeart, boolean blinking) {
-		int i;
-		int j = halfHeart ? 1 : 0;
-		int k = false && blinking ? 2 : 0;
-		i = j + k;
-
-		return 16 + (10 * 2) * 9;
-	}
-
 	@Inject(at = @At(value = "HEAD"), method = "drawHeart")
 	private void color(DrawContext context, InGameHud.HeartType type, int x, int y, int v, boolean blinking, boolean halfHeart, CallbackInfo ci) {
 		if (type == InGameHud.HeartType.NORMAL) {
@@ -83,6 +76,41 @@ public class ColorfulHudMixin {
 	@Inject(at = @At(value = "TAIL"), method = "drawHeart")
 	private void uncolor(DrawContext context, InGameHud.HeartType type, int x, int y, int v, boolean blinking, boolean halfHeart, CallbackInfo ci) {
 		context.setShaderColor(1,1,1,1);
-		context.drawTexture(ICONS, x, y, 16 + (10 * 2) * 9, v, 9, 9);
+		if (type == InGameHud.HeartType.NORMAL) {
+			context.drawTexture(ICONS, x, y, 16 + (10 * 2) * 9, v, 9, 9);
+		}
+	}
+
+	@Inject(at = @At(value = "HEAD"), method = "renderExperienceBar")
+	private void color(DrawContext context, int x, CallbackInfo ci) {
+		context.setShaderColor(r,g,b,1);
+	}
+
+	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/util/profiler/Profiler;pop()V"), method = "renderExperienceBar")
+	private void uncolor(DrawContext context, int x, CallbackInfo ci) {
+		context.setShaderColor(1,1,1,1);
+	}
+
+	@Shadow
+	public TextRenderer getTextRenderer() {
+		return null;
+	}
+
+	@Shadow
+	private int scaledWidth;
+
+	@Shadow
+	private int scaledHeight;
+
+	@Inject(at = @At(value = "TAIL"), method = "renderExperienceBar")
+	private void text(DrawContext context, int x, CallbackInfo ci) {
+		String string = "" + MinecraftClient.getInstance().player.experienceLevel;
+		context.drawText(
+				getTextRenderer(),
+				string,
+				(this.scaledWidth - this.getTextRenderer().getWidth(string)) / 2,
+				this.scaledHeight - 31 - 4,
+				Integer.parseInt(config.color.replace("#", ""), 16),
+				false);
 	}
 }
