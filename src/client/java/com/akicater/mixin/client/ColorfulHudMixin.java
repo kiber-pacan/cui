@@ -10,12 +10,16 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.hud.InGameHud;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.Vec3d;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import static com.akicater.CuiClient.hsvToRgb;
+import static org.lwjgl.glfw.GLFW.glfwGetTime;
 
 @Mixin(InGameHud.class)
 public class ColorfulHudMixin {
@@ -35,14 +39,35 @@ public class ColorfulHudMixin {
 	@Unique
 	float b;
 
+	@Unique
+	float i = 0;
+	@Unique
+	float delta = 0;
+	@Unique
+	float last = 0;
+	@Unique
+	float current = 0;
+
 	@Shadow
 	private static final Identifier ICONS = new Identifier("textures/gui/icons.png");
 
 	@Inject(at = @At(value = "HEAD"), method = "render")
 	private void color(DrawContext context, float tickDelta, CallbackInfo ci) {
-		r = convert("" + config.color.charAt(1) + config.color.charAt(2));
-		g = convert("" + config.color.charAt(3) + config.color.charAt(4));
-		b = convert("" + config.color.charAt(5) + config.color.charAt(6));
+		if (config.rainbow) {
+			current = (float) glfwGetTime();
+			delta = current - last;
+			last = current;
+			i += config.ranbowSpeed * delta;
+			if (i >= 360) i = 0;
+			Vec3d rgb = hsvToRgb(i/360,1.0f,1.0f);
+			r = (float) rgb.x;
+			g = (float) rgb.y;
+			b = (float) rgb.z;
+		} else {
+			r = convert("" + config.color.charAt(1) + config.color.charAt(2));
+			g = convert("" + config.color.charAt(3) + config.color.charAt(4));
+			b = convert("" + config.color.charAt(5) + config.color.charAt(6));
+		}
 	}
 
 	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/util/math/MatrixStack;translate(FFF)V", shift = At.Shift.AFTER), method = "renderHotbar")
@@ -81,16 +106,6 @@ public class ColorfulHudMixin {
 		}
 	}
 
-	@Inject(at = @At(value = "HEAD"), method = "renderExperienceBar")
-	private void color(DrawContext context, int x, CallbackInfo ci) {
-		context.setShaderColor(r,g,b,1);
-	}
-
-	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/util/profiler/Profiler;pop()V"), method = "renderExperienceBar")
-	private void uncolor(DrawContext context, int x, CallbackInfo ci) {
-		context.setShaderColor(1,1,1,1);
-	}
-
 	@Shadow
 	public TextRenderer getTextRenderer() {
 		return null;
@@ -104,13 +119,27 @@ public class ColorfulHudMixin {
 
 	@Inject(at = @At(value = "TAIL"), method = "renderExperienceBar")
 	private void text(DrawContext context, int x, CallbackInfo ci) {
-		String string = "" + MinecraftClient.getInstance().player.experienceLevel;
-		context.drawText(
-				getTextRenderer(),
-				string,
-				(this.scaledWidth - this.getTextRenderer().getWidth(string)) / 2,
-				this.scaledHeight - 31 - 4,
-				Integer.parseInt(config.color.replace("#", ""), 16),
-				false);
+		if (MinecraftClient.getInstance().player.experienceLevel > 0) {
+			MinecraftClient.getInstance().getProfiler().push("expLevel");
+			String string = "" + MinecraftClient.getInstance().player.experienceLevel;
+			context.setShaderColor(r,g,b,1);
+			context.drawText(
+					getTextRenderer(),
+					string,
+					(this.scaledWidth - this.getTextRenderer().getWidth(string)) / 2,
+					this.scaledHeight - 31 - 4,
+					16777215,
+					false);
+			context.setShaderColor(1,1,1,1);
+			MinecraftClient.getInstance().getProfiler().pop();
+		}
+	}
+	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawTexture(Lnet/minecraft/util/Identifier;IIIIII)V", shift = At.Shift.BEFORE), method = "renderExperienceBar")
+	private void color(DrawContext context, int x, CallbackInfo ci) {
+		context.setShaderColor(r, g, b, 1);
+	}
+	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawTexture(Lnet/minecraft/util/Identifier;IIIIII)V", shift = At.Shift.AFTER), method = "renderExperienceBar")
+	private void uncolor(DrawContext context, int x, CallbackInfo ci) {
+		context.setShaderColor(1, 1, 1, 1);
 	}
 }

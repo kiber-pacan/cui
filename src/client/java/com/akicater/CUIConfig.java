@@ -11,4 +11,6 @@ public class CUIConfig implements ConfigData {
 
     @ConfigEntry.ColorPicker
     public String color = "#00ff11";
+    public boolean rainbow = false;
+    public float ranbowSpeed = 20;
 }
