@@ -1,15 +1,14 @@
 {
 	"schemaVersion": 1,
 	"id": "cui",
-	"version": "${version}",
+	"version": " beta 1.0",
 	"name": "cui",
-	"description": "This is an example description! Tell everyone what your mod is about!",
+	"description": "Color minecraft ui in any color",
 	"authors": [
-		"Me!"
+		"akicater"
 	],
 	"contact": {
-		"homepage": "https://fabricmc.net/",
-		"sources": "https://github.com/FabricMC/fabric-example-mod"
+		"sources": "https://github.com/kiber-pacan/cui"
 	},
 	"license": "CC0-1.0",
 	"icon": "assets/cui/icon.png",
