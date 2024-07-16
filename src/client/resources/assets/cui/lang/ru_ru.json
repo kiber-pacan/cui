@@ -1,3 +1,5 @@
 {
-  "text.autoconfig.cui.option.color" : "Основной цвет"
+  "text.autoconfig.cui.option.color" : "Основной цвет",
+  "text.autoconfig.cui.option.rainbow" : "Врубить радужное переливание?",
+  "text.autoconfig.cui.option.rainbowSpeed" : "Скорость переливания"
 }

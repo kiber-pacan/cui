@@ -1,3 +1,5 @@
 {
-  "text.autoconfig.cui.option.color" : "Main color"
+  "text.autoconfig.cui.option.color" : "Main color",
+  "text.autoconfig.cui.option.rainbow" : "Enable rainbow color?",
+  "text.autoconfig.cui.option.rainbowSpeed" : "Rainbow speed"
 }
