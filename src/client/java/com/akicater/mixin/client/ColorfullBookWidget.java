@@ -48,7 +48,7 @@ public class ColorfullBookWidget {
 			current = (float) glfwGetTime();
 			delta = current - last;
 			last = current;
-			i += config.ranbowSpeed * delta;
+			i += config.rainbowSpeed * delta;
 			if (i >= 360) i = 0;
 			Vec3d rgb = hsvToRgb(i/360,1.0f,1.0f);
 			r = (float) rgb.x;
