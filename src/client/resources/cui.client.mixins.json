@@ -3,9 +3,7 @@
   "package": "com.akicater.mixin.client",
   "compatibilityLevel": "JAVA_17",
   "client": [
-    "ColorfulHudMixin",
-    "ColorfulInventoryScreen",
-    "ColorfullBookWidget"
+    "ColorfulHudMixin"
   ],
   "injectors": {
     "defaultRequire": 1
